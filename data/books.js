@@ -83,8 +83,41 @@ const addBook = (books) => {
 return promise;
 };
 
+// ========DELETE==================
+const deleteBook = (id) => {
+    const promise = new Promise((resolve, reject) => {
+        MongoClient.connect(url, settings, async function(err, client){
+            if(err){
+                reject(err);
+            } else {
+                console.log("Successfully connect to DB");
+                const db = client.db(dbName);
+                const collection = db.collection(collName);
+                try{
+                    const _id = new ObjectID(id);
+                    collection.findOneAndDelete({_id}, function(err,data){
+                        if(err){
+                            reject(err);
+                        } else {
+                            if(data.lastErrorObject.n > 0){
+                                resolve(data.value);
+                            } else {
+                                resolve({error: "ID doesn't exist."});
+                            }
+                        }
+                    })
+                }catch(err){
+                    reject({error: "ID has to be in ObjectID format."});
+                }
+            }
+        })
+    })
+    return promise;
+}
+
 
 module.exports = {
     getBooks,
-    addBook
+    addBook,
+    deleteBook
 }

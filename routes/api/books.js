@@ -3,7 +3,8 @@ const router = express.Router();
 
 const {
     getBooks,
-    addBook
+    addBook,
+    deleteBook
 } = require('../../data/books');
 
 /* GET users listing. */
@@ -32,4 +33,14 @@ router.post('/', async function(req, res, next){
     };
 })
 
+// DELETE
+router.delete('/', async function(req, res, next){
+    try{
+        const data = await deleteBook(req.body._id);
+        res.send(data); 
+    }catch(err){
+        console.log(err);
+        res.statusMessage(500, 'Internal Server Issue; check logs');
+    }
+})
 module.exports = router;
