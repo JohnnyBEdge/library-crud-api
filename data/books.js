@@ -34,6 +34,57 @@ const getBooks = () => {
     return promise;
 }
 
+// ==========POST=============================================
+const invalidBook = (book) => {
+    let result;
+    if(!book.title){
+        result = "A book title is required";
+    } else if(!book.author){
+        result = "A book author is required.";
+    } else if(!book.genre){
+        result = "A book genre is require.";
+    }
+    return result;
+};
+
+const addBook = (books) => {
+    const promise = new Promise((resolve, reject) => {
+        if(!Array.isArray(books)){
+            reject({error: "Must submit an array."});
+        } else {
+            const invalidBooks = books.filter((book) => {
+                const check = invalidBook(book);
+                if(check){
+                    book.invalid = check;
+                }
+                return book.invalid;
+            });
+        if(invalidBooks.length > 0){
+            reject({
+                error: "Some books were invalid",
+                data: invalidBooks
+            });
+        } else {
+            MongoClient.connect(url, settings, async function(err,client){
+                if(err){
+                    reject(err); 
+                } else {
+                    console.log("Successfully connect to DB.");
+                    const db = client.db('library');
+                    const collection = db.collection('books');
+                    const results = await collection.insertMany(books);
+                    resolve(results.ops);
+                }
+            })
+        }
+    }
+});
+    
+return promise;
+};
+
+
 module.exports = {
-    getBooks
+    getBooks,
+    addBook
 }
